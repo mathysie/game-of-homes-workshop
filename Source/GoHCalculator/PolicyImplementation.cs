@@ -37,7 +37,30 @@
         /// 
         public override double DetermineNewRent(House house)
         {
-			return house.MonthlyRent;
+            double newTenantFactor = 1;
+            double currentTenantFactor = 1;
+            if (HousingAssociation.SolvencyRatio > 0.3)
+            {
+                newTenantFactor = 0.22;
+                currentTenantFactor = 0.23;
+            }
+
+            if (house.CurrentTenantLeaves)
+            {
+                if (house.MaximumAllowedMonthlyRentNewTenant < house.MonthlyRent)
+                {
+                    return house.MaximumAllowedMonthlyRentNewTenant;
+                }
+                else
+                {
+                    double difference = house.MaximumAllowedMonthlyRentNewTenant - house.MonthlyRent;
+                    return house.MonthlyRent + newTenantFactor * difference;
+                }
+            }
+            else
+            {
+                return house.MonthlyRent * (1 + currentTenantFactor * Economy.Get(Series.PriceInflation));
+            }
         }
 
         /// Implement function DetermineSell below.
